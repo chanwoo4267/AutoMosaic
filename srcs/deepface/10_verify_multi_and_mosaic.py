@@ -1,9 +1,16 @@
 from deepface import DeepFace
-import numpy as np
 import cv2
 from retinaface import RetinaFace
 
-cap = cv2.VideoCapture("/Users/chanwoo4267/Downloads/deepface/sample_video/1.mp4")
+# video_path = "/Users/chanwoo4267/Downloads/deepface/sample_video/1.mp4"
+# img1_path = "/Users/chanwoo4267/Downloads/deepface/sample_video/2.png"
+# img2_path = "/Users/chanwoo4267/Downloads/deepface/sample_video/3.png"
+
+video_path = "../../sample_video/1.mp4"
+img1_path = "../../sample_video/2.png"
+img2_path = "../../sample_video/3.png"
+
+cap = cv2.VideoCapture(video_path)
 v = 50
 
 frame_width = int(cap.get(3))  # Width of the frames in the video
@@ -12,10 +19,6 @@ fps = cap.get(cv2.CAP_PROP_FPS)
 
 fourcc = cv2.VideoWriter_fourcc(*'XVID')
 out = cv2.VideoWriter('output.avi', fourcc, fps, (frame_width, frame_height))
-
-# target image
-img1_path = "/Users/chanwoo4267/Downloads/deepface/sample_video/2.png"
-img2_path = "/Users/chanwoo4267/Downloads/deepface/sample_video/3.png"
 
 img1_faces = RetinaFace.extract_faces(img1_path)
 for img1_face in img1_faces:
@@ -44,8 +47,8 @@ while(True):
         unmosaic_flag = False
 
         for i in range(len(unmosaic)):
-            obj = DeepFace.verify(img1_path = unmosaic[i], img2_path = frame[startY:endY, startX:endX], model_name = "VGG-Face", enforce_detection = False)
-
+            obj = DeepFace.verify(img1_path = unmosaic[i], img2_path = frame[startY:endY, startX:endX], model_name = "VGG-Face", enforce_detection = False, detector_backend = 'retinaface')
+            # modify detector_backend to retinaface
             if (obj["distance"] < 0.3) : # 같은사람
                 unmosaic_flag = True
                 break # 더이상 체크할 필요 없음
@@ -58,7 +61,7 @@ while(True):
             frame[startY:endY, startX:endX] = roi
     
     out.write(frame)
-    cv2.imshow('result', frame)
+    # cv2.imshow('result', frame)
 
     k = cv2.waitKey(30) & 0xff
     if k == 27: # Esc 키를 누르면 종료
